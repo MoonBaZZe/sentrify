@@ -1,6 +1,6 @@
 # Compile
 
-I have used `dart sdk 2.14.2`
+I have used `dart sdk 2.17.1 (stable)`
 
 Clone the repository and `cd` into it
 

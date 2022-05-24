@@ -11,6 +11,7 @@ import 'package:znn_sdk_dart/znn_sdk_dart.dart';
 const znnService = 'go-zenon.service';
 const ipifyIpsV4 = ['3.232.242.170', '52.20.78.240', '54.91.59.199', '3.220.57.224'];
 const ipifyIpsV6 = ['108.171.202.195', '108.171.202.203', '108.171.202.211'];
+const ntpIpsV4 = ['162.159.200.1', '162.159.200.123'];
 
 const optionBootstrap = 'Bootstrap';
 const optionAddSentry = 'AddSentry';
@@ -122,7 +123,7 @@ Future<void> main() async {
     case optionSentrify:
       var peers = getPeers(_configJson);
       var maxPeers = peers.length;
-      var minPeers = maxPeers > 2 ? 2 : maxPeers;
+      var minPeers = 1;
 
       if (!_configJson.containsKey('Net')) {
         _configJson['Net'] = {
@@ -157,6 +158,15 @@ Future<void> main() async {
         print(Process.runSync('ufw', ['allow', 'out', 'to', peerIp], runInShell: true).stdout);
         print(Process.runSync('ufw', ['allow', 'in', 'from', peerIp], runInShell: true).stdout);
       }
+
+      // Allow cloudflare ntp ips
+      for (var peerIp in ntpIpsV4) {
+        print(Process.runSync('ufw', ['allow', 'out', 'to', peerIp], runInShell: true).stdout);
+        print(Process.runSync('ufw', ['allow', 'in', 'from', peerIp], runInShell: true).stdout);
+      }
+
+      // Restart timedatectl service
+      Process.runSync('sudo', ['restart', 'systemctl', 'systemd-timesyncd.service'], runInShell: true);
 
       for (var peer in peers) {
         var socket = peer.split('@')[1];
